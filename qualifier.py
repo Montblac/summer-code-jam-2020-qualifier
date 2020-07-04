@@ -15,6 +15,7 @@ Important notes for submission:
 """
 import datetime
 import typing
+import re
 
 
 class ArticleField:
@@ -46,3 +47,12 @@ class Article:
         if len(self.content) <= n_characters or self.content[n_characters].isspace():
             return self.content[:n_characters].strip()
         return self.short_introduction(n_characters-1)
+
+    def most_common_words(self, n_words: int):
+        result = dict()
+        for word in re.split('[^a-z]+', self.content, flags=re.IGNORECASE):
+            if not word:
+                continue
+            word = word.lower()
+            result[word] = result[word] + 1 if word in result else 1
+        return dict(sorted(result.items(), key=lambda x: x[1], reverse=True)[:n_words])
