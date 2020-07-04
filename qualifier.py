@@ -20,9 +20,27 @@ import re
 
 class ArticleField:
     """The `ArticleField` class for the Advanced Requirements."""
+    def __set_name__(self, owner, name):
+        self.name = name
 
     def __init__(self, field_type: typing.Type[typing.Any]):
-        pass
+        self.field_type = field_type
+
+    def __get__(self, instance, owner):
+        return instance.__dict__.get(self.name)
+
+    def __set__(self, instance, value):
+        if not issubclass(type(value), self.field_type):
+            def type_to_str(type_obj):
+                type_obj = str(type_obj)
+                start = type_obj.find("'")
+                end = type_obj.rfind("'")
+                return type_obj[start+1:end]
+
+            raise TypeError("expected an instance of type '{}' for attribute '{}', got '{}' instead".format(
+                type_to_str(self.field_type), self.name, type_to_str(type(value))))
+
+        instance.__dict__[self.name] = value
 
 class Article:
     """The `Article` class you need to write for the qualifier."""
@@ -41,7 +59,7 @@ class Article:
     def __setattr__(self, name, value):
         if name == 'content':
             self.last_edited = datetime.datetime.now()
-        return super().__setattr__(name, value)
+        super().__setattr__(name, value)
 
     def __repr__(self):
         return '<Article title={title} author={author} publication_date={publication_date}>'.format(
