@@ -24,18 +24,24 @@ class ArticleField:
     def __init__(self, field_type: typing.Type[typing.Any]):
         pass
 
-
 class Article:
     """The `Article` class you need to write for the qualifier."""
     id = -1
 
     def __init__(self, title: str, author: str, publication_date: datetime.datetime, content: str):
-        Article.id += 1
-        self.id = Article.id
         self.title = title
         self.author = author
         self.publication_date = publication_date
         self.content = content
+        self.last_edited = None
+
+        Article.id += 1
+        self.id = Article.id
+
+    def __setattr__(self, name, value):
+        if name == 'content':
+            self.last_edited = datetime.datetime.now()
+        return super().__setattr__(name, value)
 
     def __repr__(self):
         return '<Article title={title} author={author} publication_date={publication_date}>'.format(
@@ -45,6 +51,12 @@ class Article:
 
     def __len__(self):
         return len(self.content)
+
+    def __eq__(self, other):
+        return self.publication_date == other.publication_date
+
+    def __lt__(self, other):
+        return self.publication_date < other.publication_date
 
     def short_introduction(self, n_characters: int):
         if len(self.content) <= n_characters or self.content[n_characters].isspace():
